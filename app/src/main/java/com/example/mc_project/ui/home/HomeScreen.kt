@@ -1,19 +1,22 @@
 package com.example.mc_project.ui.home
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,6 +28,10 @@ fun HomeScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     val currentPage by viewModel.currentPage.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+
+    // State for SwipeRefresh
+    val swipeRefreshState = rememberSwipeRefreshState(isLoading)
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Title bar at the top using CenterAlignedTopAppBar
@@ -39,6 +46,31 @@ fun HomeScreen(
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        )
+
+        // Search Bar
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { viewModel.updateSearchQuery(it) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            placeholder = { Text("Search articles...") },
+            trailingIcon = {
+                IconButton(onClick = { viewModel.searchArticles() }) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search"
+                    )
+                }
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = { viewModel.searchArticles() }
             )
         )
 
@@ -60,7 +92,9 @@ fun HomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "No articles available",
+                        text = if (isLoading) "Searching..." else
+                            if (searchQuery.isNotEmpty()) "No matching articles found" else
+                                "No articles available",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -69,45 +103,79 @@ fun HomeScreen(
                     }
                 }
             } else {
-                // Display the list of articles with page info
+                // Display the list of articles with page info and pull-to-refresh
                 Column {
-                    // Articles list
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = 8.dp)
+                    // SwipeRefresh wrapper around the LazyColumn
+                    SwipeRefresh(
+                        state = swipeRefreshState,
+                        onRefresh = { viewModel.refreshArticles() },
+                        modifier = Modifier.weight(1f)
                     ) {
-                        items(articles) { article ->
-                            PostCard(
-                                article = article,
-                                onClick = { onArticleClick(article.title) }
-                            )
-                        }
+                        // Articles list
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(vertical = 8.dp)
+                        ) {
+                            items(articles) { article ->
+                                PostCard(
+                                    article = article,
+                                    onClick = { onArticleClick(article.title) }
+                                )
+                            }
 
-                        // Footer loading indicator
-                        if (isLoading) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
+                            // Footer loading indicator
+                            if (isLoading) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            }
 
-            // Refresh button (floating action button)
-            FloatingActionButton(
-                onClick = { viewModel.refreshArticles() },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            ) {
-                Text("Refresh")
+                    // Pagination controls - fixed at the bottom, not overlapping with content
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Previous Button
+                            Button(
+                                onClick = { viewModel.previousPage() },
+                                enabled = currentPage > 1 && !isLoading
+                            ) {
+                                Text("Previous")
+                            }
+
+                            // Page indicator
+                            Text(
+                                text = "Page $currentPage",
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+
+                            // Next Button
+                            Button(
+                                onClick = { viewModel.nextPage() },
+                                enabled = !isLoading  // Always enabled unless loading
+                            ) {
+                                Text("Next")
+                            }
+                        }
+                    }
+                }
             }
 
             // Show error message if there is one
@@ -115,7 +183,7 @@ fun HomeScreen(
                 Snackbar(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(16.dp)
+                        .padding(16.dp, 16.dp, 16.dp, 72.dp) // Added bottom padding to avoid overlap with buttons
                 ) {
                     Text(text = errorMessage)
                 }
@@ -123,53 +191,3 @@ fun HomeScreen(
         }
     }
 }
-=======
->>>>>>> 50cd092 (Made changes)
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-
-@Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
-    val article by viewModel.article.collectAsState()
-
-    if (article == null) {
-        // Show a loading indicator while fetching
-        Column {
-            CircularProgressIndicator()
-            Text(text = "Loading article...", style = MaterialTheme.typography.bodyMedium)
-        }
-    } else {
-        Column {
-            Text(
-                text = article!!.title,
-                style = MaterialTheme.typography.titleLarge
-            )
-
-            article!!.imageUrl?.let { url ->
-                AsyncImage(
-                    model = url,
-                    contentDescription = article!!.title
-                )
-            }
-
-            Text(
-                text = article!!.extract ?: "No summary available.",
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-    }
-}
-
-
-
-<<<<<<< HEAD
-=======
->>>>>>> upstream/main
->>>>>>> 50cd092 (Made changes)

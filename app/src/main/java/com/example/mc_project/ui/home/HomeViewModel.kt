@@ -1,17 +1,9 @@
 package com.example.mc_project.ui.home
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mc_project.domain.model.Article
-<<<<<<< HEAD
-import com.example.mc_project.domain.usecase.GetRandomArticleUseCase
-=======
-<<<<<<< HEAD
 import com.example.mc_project.domain.usecase.GetArticlesListUseCase
-=======
-import com.example.mc_project.domain.usecase.GetRandomArticleUseCase
->>>>>>> upstream/main
->>>>>>> 50cd092 (Made changes)
+import com.example.mc_project.domain.usecase.SearchArticlesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,10 +12,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-    private val getArticlesListUseCase: GetArticlesListUseCase
+    private val getArticlesListUseCase: GetArticlesListUseCase,
+    private val searchArticlesUseCase: SearchArticlesUseCase
 ) : ViewModel() {
     private val _articles = MutableStateFlow<List<Article>>(emptyList())
     val articles: StateFlow<List<Article>> = _articles
@@ -37,7 +27,14 @@ class HomeViewModel @Inject constructor(
     private val _currentPage = MutableStateFlow(1)
     val currentPage: StateFlow<Int> = _currentPage
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
     private val articlesPerPage = 10
+    private var isSearchMode = false
+
+    // Cache for search results to allow pagination
+    private var searchResultsCache = listOf<Article>()
 
     init {
         fetchArticles()
@@ -49,6 +46,7 @@ class HomeViewModel @Inject constructor(
             _error.value = null
             try {
                 _articles.value = getArticlesListUseCase(articlesPerPage)
+                isSearchMode = false
             } catch (e: Exception) {
                 _error.value = "Failed to load articles: ${e.localizedMessage}"
             } finally {
@@ -57,30 +55,63 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
     fun refreshArticles() {
         _currentPage.value = 1
-        fetchArticles()
-    }
-=======
->>>>>>> 50cd092 (Made changes)
-    private val getRandomArticleUseCase: GetRandomArticleUseCase
-) : ViewModel() {
-
-    private val _article = MutableStateFlow<Article?>(null)
-    val article: StateFlow<Article?> = _article
-
-    init {
-        fetchRandomArticle()
-    }
-
-    fun fetchRandomArticle() {
-        viewModelScope.launch {
-            _article.value = getRandomArticleUseCase()
+        if (isSearchMode && _searchQuery.value.isNotEmpty()) {
+            searchArticles()
+        } else {
+            fetchArticles()
         }
     }
-<<<<<<< HEAD
-=======
->>>>>>> upstream/main
->>>>>>> 50cd092 (Made changes)
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
+
+    fun searchArticles() {
+        if (_searchQuery.value.isEmpty()) {
+            fetchArticles()
+            return
+        }
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                val results = searchArticlesUseCase(_searchQuery.value, articlesPerPage, _currentPage.value)
+                _articles.value = results
+                isSearchMode = true
+
+                if (results.isEmpty() && _currentPage.value > 1) {
+                    // If we've gone beyond available results, go back to the previous page
+                    _currentPage.value -= 1
+                    searchArticles()
+                }
+            } catch (e: Exception) {
+                _error.value = "Search failed: ${e.localizedMessage}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun nextPage() {
+        _currentPage.value += 1
+        if (isSearchMode) {
+            searchArticles()
+        } else {
+            fetchArticles()
+        }
+    }
+
+    fun previousPage() {
+        if (_currentPage.value > 1) {
+            _currentPage.value -= 1
+            if (isSearchMode) {
+                searchArticles()
+            } else {
+                fetchArticles()
+            }
+        }
+    }
 }

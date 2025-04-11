@@ -5,19 +5,11 @@ import com.example.mc_project.data.remote.api.WikipediaApi
 import com.example.mc_project.domain.model.Article
 import com.example.mc_project.domain.repository.ArticleRepository
 import javax.inject.Inject
-<<<<<<< HEAD
-
-=======
-<<<<<<< HEAD
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
 // ArticleRepositoryImpl.kt (updated)
-=======
-
->>>>>>> upstream/main
->>>>>>> 50cd092 (Made changes)
 class ArticleRepositoryImpl @Inject constructor(
     private val api: WikipediaApi
 ) : ArticleRepository {
@@ -28,10 +20,6 @@ class ArticleRepositoryImpl @Inject constructor(
     override suspend fun getArticleByTitle(title: String): Article {
         return api.getArticleByTitle(title).toDomain()
     }
-<<<<<<< HEAD
-}
-=======
-<<<<<<< HEAD
     override suspend fun getMultipleRandomArticles(count: Int): List<Article> {
         // Use coroutines to fetch multiple articles in parallel
         return coroutineScope {
@@ -64,7 +52,3 @@ class ArticleRepositoryImpl @Inject constructor(
     }
 
 }
-=======
-}
->>>>>>> upstream/main
->>>>>>> 50cd092 (Made changes)

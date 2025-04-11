@@ -72,6 +72,7 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    implementation(libs.accompanist.swiperefresh)
 
     // Testing
     implementation(libs.androidx.espresso.core)

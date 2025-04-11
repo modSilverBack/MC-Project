@@ -12,11 +12,5 @@ interface WikipediaApi {
     suspend fun getArticleByTitle(
         @Path("title") title: String
     ): ArticleDTO
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 
-=======
->>>>>>> upstream/main
->>>>>>> 50cd092 (Made changes)
 }
