@@ -1,0 +1,32 @@
+[33mcommit 4fa15070ce80817bd63299d076b10e6b954b338c[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m
+Merge: 2c93848 f607b45
+Author: Nitin Rayal <rayalnitin14@gmail.com>
+Date:   Fri Apr 11 02:55:43 2025 +0530
+
+    made first changes
+
+[33mcommit 2c93848508d7a602d686e5e404aba5f0a6234ce3[m[33m ([m[1;31morigin/main[m[33m)[m
+Merge: f5532b7 35255a0
+Author: Nitin Rayal <rayalnitin14@gmail.com>
+Date:   Fri Apr 11 02:31:58 2025 +0530
+
+    Merge branch 'master'
+    merging master code into main
+
+[33mcommit 35255a0171da19d612c00e2e1b0843ef00d83f0c[m[33m ([m[1;32mmaster[m[33m)[m
+Author: Nitin Rayal <rayalnitin14@gmail.com>
+Date:   Fri Apr 11 02:28:26 2025 +0530
+
+    modified existing files
+
+[33mcommit f5532b789efb891a49ccc33a0d9cdef8d339dcc3[m
+Author: Nitin Rayal <rayalnitin14@gmail.com>
+Date:   Fri Apr 11 02:03:17 2025 +0530
+
+    Made some changes to home page
+
+[33mcommit f607b4524c65df03f50a687b8c36de23d9fbd76a[m[33m ([m[1;31mupstream/main[m[33m)[m
+Author: Abhishek Beniwal <abhishek22022@iiitd.ac.in>
+Date:   Wed Apr 9 12:13:09 2025 +0530
+
+    added the shi

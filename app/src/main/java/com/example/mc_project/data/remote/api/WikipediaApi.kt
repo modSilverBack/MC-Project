@@ -12,4 +12,5 @@ interface WikipediaApi {
     suspend fun getArticleByTitle(
         @Path("title") title: String
     ): ArticleDTO
+
 }
