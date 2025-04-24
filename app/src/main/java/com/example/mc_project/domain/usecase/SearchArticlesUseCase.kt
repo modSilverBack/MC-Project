@@ -10,7 +10,7 @@ class SearchArticlesUseCase @Inject constructor(
     suspend operator fun invoke(query: String, limit: Int, page: Int): List<Article> {
         // Fetch more articles than needed to increase chance of finding matches
         val multiplier = 3
-        val articles = repository.getMultipleRandomArticles(limit * multiplier)
+        val articles = repository.getRandomArticles(limit * multiplier)
 
         // Filter articles by search query (case-insensitive search in title and description)
         val filteredArticles = articles.filter { article ->

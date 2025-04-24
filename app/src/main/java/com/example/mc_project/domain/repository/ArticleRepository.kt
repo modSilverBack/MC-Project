@@ -6,5 +6,5 @@ import com.example.mc_project.domain.model.Article
 interface ArticleRepository {
     suspend fun getRandomArticle(): Article
     suspend fun getArticleByTitle(title: String): Article
-    suspend fun getMultipleRandomArticles(count: Int): List<Article>
+    suspend fun getRandomArticles(count: Int): List<Article>
 }

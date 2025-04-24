@@ -1,7 +1,7 @@
 package com.example.mc_project.data.repository
 
 import com.example.mc_project.data.mapper.toDomain
-import com.example.mc_project.data.remote.api.WikipediaApi
+import com.example.mc_project.data.remote.api.WikipediaApiService
 import com.example.mc_project.domain.model.Article
 import com.example.mc_project.domain.repository.ArticleRepository
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import kotlinx.coroutines.coroutineScope
 
 // ArticleRepositoryImpl.kt (updated)
 class ArticleRepositoryImpl @Inject constructor(
-    private val api: WikipediaApi
+    private val api: WikipediaApiService
 ) : ArticleRepository {
     override suspend fun getRandomArticle(): Article {
         return api.getRandomArticle().toDomain()
@@ -20,7 +20,7 @@ class ArticleRepositoryImpl @Inject constructor(
     override suspend fun getArticleByTitle(title: String): Article {
         return api.getArticleByTitle(title).toDomain()
     }
-    override suspend fun getMultipleRandomArticles(count: Int): List<Article> {
+    override suspend fun getRandomArticles(count: Int): List<Article> {
         // Use coroutines to fetch multiple articles in parallel
         return coroutineScope {
             val articles = mutableListOf<Article>()

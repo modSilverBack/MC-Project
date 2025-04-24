@@ -4,7 +4,7 @@ import com.example.mc_project.data.remote.model.ArticleDTO.ArticleDTO
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-interface WikipediaApi {
+interface WikipediaApiService {
     @GET("page/random/summary")
     suspend fun getRandomArticle(): ArticleDTO
 
