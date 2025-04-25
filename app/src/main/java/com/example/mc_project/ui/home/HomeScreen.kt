@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mc_project.domain.model.Article
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
@@ -22,7 +23,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onArticleClick: (String) -> Unit = {}
+    onArticleClick : (Article) -> Unit
 ) {
     val articles by viewModel.articles.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -119,7 +120,7 @@ fun HomeScreen(
                             items(articles) { article ->
                                 PostCard(
                                     article = article,
-                                    onClick = { onArticleClick(article.title) }
+                                    onClick = { onArticleClick(article) }
                                 )
                             }
 

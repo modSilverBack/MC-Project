@@ -70,6 +70,7 @@ dependencies {
 
     // Hilt core
     implementation(libs.hilt.android)
+    implementation(libs.generativeai)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.accompanist.swiperefresh)
