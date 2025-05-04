@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mc_project.domain.model.Article
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
@@ -22,13 +25,14 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onArticleClick: (String) -> Unit = {}
+    onArticleClick: (Article) -> Unit
 ) {
     val articles by viewModel.articles.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     val currentPage by viewModel.currentPage.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val isDarkTheme by viewModel.isDarkTheme.collectAsState()
 
     // State for SwipeRefresh
     val swipeRefreshState = rememberSwipeRefreshState(isLoading)
@@ -42,6 +46,15 @@ fun HomeScreen(
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
+            },
+            actions = {
+                // Theme toggle button
+                IconButton(onClick = { viewModel.toggleTheme() }) {
+                    Icon(
+                        imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                        contentDescription = if (isDarkTheme) "Switch to Light Mode" else "Switch to Dark Mode"
+                    )
+                }
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -119,7 +132,7 @@ fun HomeScreen(
                             items(articles) { article ->
                                 PostCard(
                                     article = article,
-                                    onClick = { onArticleClick(article.title) }
+                                    onClick = { onArticleClick(article) }
                                 )
                             }
 

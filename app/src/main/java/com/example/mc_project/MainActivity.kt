@@ -3,26 +3,52 @@ package com.example.mc_project
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.mc_project.ui.theme.MCProjectTheme
-import dagger.hilt.android.AndroidEntryPoint
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.mc_project.ui.AppThemeWrapper
 import com.example.mc_project.ui.home.HomeScreen
+import com.example.mc_project.ui.home.HomeViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            MCProjectTheme {
-                    HomeScreen()
+            val viewModel: HomeViewModel = hiltViewModel()
+
+            AppThemeWrapper(viewModel = viewModel) {
+                Surface(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    val navController = rememberNavController()
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = "home"
+                    ) {
+                        composable("home") {
+                            HomeScreen(
+                                viewModel = viewModel,
+                                onArticleClick = { article ->
+                                    // Handle article click navigation
+                                    viewModel.selectArticle(article)
+                                    navController.navigate("article_detail")
+                                }
+                            )
+                        }
+
+                        composable("article_detail") {
+                            // Your article detail screen
+                            // ArticleDetailScreen(viewModel = viewModel)
+                        }
+                    }
+                }
             }
         }
     }

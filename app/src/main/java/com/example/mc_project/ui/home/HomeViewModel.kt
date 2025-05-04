@@ -1,8 +1,11 @@
 package com.example.mc_project.ui.home
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mc_project.domain.model.Article
-import com.example.mc_project.domain.usecase.GetArticlesListUseCase
+import com.example.mc_project.domain.usecase.CacheArticlePageUseCase
+import com.example.mc_project.domain.usecase.GetCachedArticlePageUseCase
+import com.example.mc_project.domain.usecase.GetRandomArticlesUseCase
 import com.example.mc_project.domain.usecase.SearchArticlesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,11 +15,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getArticlesListUseCase: GetArticlesListUseCase,
-    private val searchArticlesUseCase: SearchArticlesUseCase
+    private val getCachedArticlePageUseCase: GetCachedArticlePageUseCase,
+    private val getArticlesUseCase: GetRandomArticlesUseCase,
+    private val searchArticlesUseCase: SearchArticlesUseCase,
+    private val cacheArticlePageUseCase: CacheArticlePageUseCase
 ) : ViewModel() {
     private val _articles = MutableStateFlow<List<Article>>(emptyList())
     val articles: StateFlow<List<Article>> = _articles
+
+    private val _selectedArticle = MutableStateFlow<Article>(Article("","","","",""))
+    val selectedArticle: StateFlow<Article> = _selectedArticle
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -30,22 +38,38 @@ class HomeViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
+    // Add theme state
+    private val _isDarkTheme = MutableStateFlow(false)
+    val isDarkTheme: StateFlow<Boolean> = _isDarkTheme
+
     private val articlesPerPage = 10
     private var isSearchMode = false
-
-    // Cache for search results to allow pagination
-    private var searchResultsCache = listOf<Article>()
 
     init {
         fetchArticles()
     }
 
-    fun fetchArticles() {
+    private fun fetchArticles() {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             try {
-                _articles.value = getArticlesListUseCase(articlesPerPage)
+                // Try to fetch cached page
+                _articles.value = getCachedArticlePageUseCase.execute(_currentPage.value)
+
+                // If no cached articles found, fetch from API
+                if (_articles.value.isEmpty()) {
+                    val randomArticles = getArticlesUseCase(articlesPerPage)
+                    _articles.value = randomArticles
+                    // Cache the articles
+                    // You can choose to cache it directly here
+                    // Assuming you have a method to cache articles by page in your repo
+                    cacheArticlePageUseCase.execute(
+                        _currentPage.value,
+                        randomArticles
+                    )
+                }
+
                 isSearchMode = false
             } catch (e: Exception) {
                 _error.value = "Failed to load articles: ${e.localizedMessage}"
@@ -78,11 +102,11 @@ class HomeViewModel @Inject constructor(
             _isLoading.value = true
             _error.value = null
             try {
-                val results = searchArticlesUseCase(_searchQuery.value, articlesPerPage, _currentPage.value)
-                _articles.value = results
+                val result = listOf(searchArticlesUseCase(_searchQuery.value))
+                _articles.value = result
                 isSearchMode = true
 
-                if (results.isEmpty() && _currentPage.value > 1) {
+                if (result.isEmpty() && _currentPage.value > 1) {
                     // If we've gone beyond available results, go back to the previous page
                     _currentPage.value -= 1
                     searchArticles()
@@ -113,5 +137,19 @@ class HomeViewModel @Inject constructor(
                 fetchArticles()
             }
         }
+    }
+
+    fun selectArticle(article: Article) {
+        _selectedArticle.value = article
+    }
+
+    // Add theme toggle function
+    fun toggleTheme() {
+        _isDarkTheme.value = !_isDarkTheme.value
+    }
+
+    // Set theme explicitly
+    fun setTheme(isDark: Boolean) {
+        _isDarkTheme.value = isDark
     }
 }
