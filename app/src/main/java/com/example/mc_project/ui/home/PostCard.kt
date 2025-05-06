@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -22,35 +23,31 @@ fun PostCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable(onClick = onClick),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             article.imageUrl?.let { url ->
                 AsyncImage(
                     model = url,
                     contentDescription = article.title,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp), // Set height to fit the card
-                    contentScale = ContentScale.Crop // Ensures image fills the space properly
+                        .height(180.dp),
+                    contentScale = ContentScale.Crop
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-
             Text(
                 text = article.title,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Use description if available, otherwise use extract
             val summary = article.description ?: article.extract ?: "No summary available."
             Text(
                 text = summary,

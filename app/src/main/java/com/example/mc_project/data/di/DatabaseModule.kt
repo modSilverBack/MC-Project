@@ -2,10 +2,13 @@ package com.example.mc_project.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.mc_project.data.local.dao.BookmarkedArticleDao
 import com.example.mc_project.data.local.dao.CachedArticlePageDao
-import com.example.mc_project.data.local.db.CachedArticlePageDatabase
+import com.example.mc_project.data.local.db.ArticleDatabase
+import com.example.mc_project.data.repository.BookmarkedArticleRepositoryImpl
 import com.example.mc_project.data.repository.CachedArticlePageRepositoryImpl
 import com.example.mc_project.domain.repository.ArticleRepository
+import com.example.mc_project.domain.repository.BookmarkedArticleRepository
 import com.example.mc_project.domain.repository.CachedArticlePageRepository
 import dagger.Module
 import dagger.Provides
@@ -20,17 +23,17 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideCachedArticlePageDatabase(@ApplicationContext context: Context): CachedArticlePageDatabase {
+    fun provideArticleDatabase(@ApplicationContext context: Context): ArticleDatabase {
         return Room.databaseBuilder(
-            context,
-            CachedArticlePageDatabase::class.java,
-            "wiki_db"
-        ).build()
+                context,
+                ArticleDatabase::class.java,
+                "wiki_db"
+            ).fallbackToDestructiveMigration(false).build()
     }
 
     @Provides
     @Singleton
-    fun provideCachedArticlePageDao(db: CachedArticlePageDatabase): CachedArticlePageDao = db.articleDao()
+    fun provideCachedArticlePageDao(db: ArticleDatabase): CachedArticlePageDao = db.articleDao()
 
     @Provides
     @Singleton
@@ -39,5 +42,15 @@ object DatabaseModule {
         dao: CachedArticlePageDao
     ): CachedArticlePageRepository {
         return CachedArticlePageRepositoryImpl(apiRepo, dao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBookmarkedArticleDao(db: ArticleDatabase): BookmarkedArticleDao = db.bookmarkedArticleDao()
+
+    @Provides
+    @Singleton
+    fun provideBookmarkedArticleRepository(dao: BookmarkedArticleDao): BookmarkedArticleRepository {
+        return BookmarkedArticleRepositoryImpl(dao)
     }
 }

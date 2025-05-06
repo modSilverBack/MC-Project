@@ -1,9 +1,10 @@
-package com.example.mc_project.ui.detail
+package com.example.mc_project.ui.home
 
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -11,13 +12,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.mc_project.domain.model.Article
-
+import com.example.mc_project.ui.detail.DetailArticleViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +36,7 @@ fun DetailArticleScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(article.title) },
+                title = { Text(article.title, maxLines = 1) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -85,7 +88,10 @@ fun DetailArticleScreen(
         ) {
             article.imageUrl?.let { url ->
                 AsyncImage(
-                    model = ImageRequest.Builder(context).data(url).crossfade(true).build(),
+                    model = ImageRequest.Builder(context)
+                        .data(url)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = "Article Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -95,19 +101,21 @@ fun DetailArticleScreen(
                 )
             }
 
-            Text(article.title, style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.height(12.dp))
+            Text(
+                text = article.title,
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             article.extract?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
 
-            Spacer(Modifier.height(16.dp))
-
-            // Show current speed
-            Text("Speed: ${"%.2f".format(speechRate)}x", style = MaterialTheme.typography.labelLarge)
-
-            Spacer(Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             article.sourceUrl?.let { url ->
                 Text(
@@ -125,3 +133,4 @@ fun DetailArticleScreen(
         }
     }
 }
+

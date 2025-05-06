@@ -5,5 +5,6 @@ data class Article(
     val description: String?,
     val extract: String?,
     val imageUrl: String?,
-    val sourceUrl: String?
+    val sourceUrl: String?,
+    val isBookmarked: Boolean = false
 )
