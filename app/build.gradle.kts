@@ -93,4 +93,6 @@ dependencies {
     implementation(libs.androidx.room.guava)
     implementation(libs.androidx.room.paging.guava)
 
+    implementation(libs.androidx.datastore.preferences)
+
 }

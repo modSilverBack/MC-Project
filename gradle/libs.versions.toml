@@ -1,5 +1,6 @@
 [versions]
 agp = "8.8.0"
+datastorePreferences = "1.1.4"
 hiltNavigationCompose = "1.1.0"
 kotlin = "2.0.0"
 
@@ -28,6 +29,7 @@ generativeai = "0.9.0"
 
 [libraries]
 # Hilt Core
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 androidx-room-guava = { module = "androidx.room:room-guava", version.ref = "roomCompiler" }
