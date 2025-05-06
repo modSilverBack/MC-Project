@@ -3,9 +3,13 @@
     import androidx.lifecycle.ViewModel
     import androidx.lifecycle.viewModelScope
     import com.example.mc_project.domain.model.Article
+    import com.example.mc_project.domain.usecase.BookmarkArticle
     import com.example.mc_project.domain.usecase.CacheArticlePageUseCase
+    import com.example.mc_project.domain.usecase.ClearCacheUseCase
     import com.example.mc_project.domain.usecase.GetCachedArticlePageUseCase
     import com.example.mc_project.domain.usecase.GetRandomArticlesUseCase
+    import com.example.mc_project.domain.usecase.IsBookmarked
+    import com.example.mc_project.domain.usecase.RemoveBookmark
     import com.example.mc_project.domain.usecase.SearchArticlesUseCase
     import dagger.hilt.android.lifecycle.HiltViewModel
     import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +22,13 @@
         private val getCachedArticlePageUseCase: GetCachedArticlePageUseCase,
         private val getArticlesUseCase: GetRandomArticlesUseCase,
         private val searchArticlesUseCase: SearchArticlesUseCase,
-        private val cacheArticlePageUseCase: CacheArticlePageUseCase
+        private val cacheArticlePageUseCase: CacheArticlePageUseCase,
+        private val clearCacheUseCase: ClearCacheUseCase,
+        private val bookmarkArticle: BookmarkArticle, // Add the bookmark use case
+        private val removeBookmark: RemoveBookmark, // Add the remove bookmark use case
+        private val isBookmark: IsBookmarked
     ) : ViewModel() {
+
         private val _articles = MutableStateFlow<List<Article>>(emptyList())
         val articles: StateFlow<List<Article>> = _articles
 
@@ -76,6 +85,7 @@
         }
 
         fun refreshArticles() {
+            clearCachedPages()
             _currentPage.value = 1
             if (isSearchMode && _searchQuery.value.isNotEmpty()) {
                 searchArticles()
@@ -137,6 +147,28 @@
 
         fun selectArticle(article: Article) {
             _selectedArticle.value = article
+        }
+
+        fun clearCachedPages() {
+            viewModelScope.launch {
+                // Assuming you add this method to your repository or use case layer
+                clearCacheUseCase.invoke()
+            }
+        }
+
+        fun addBookmark(article: Article) {
+            viewModelScope.launch {
+                bookmarkArticle.execute(article)
+                fetchArticles() // Refetch articles to update the list
+            }
+        }
+
+        // Remove article from bookmarks
+        fun removeBookmark(article: Article) {
+            viewModelScope.launch {
+                removeBookmark.execute(article)
+                fetchArticles() // Refetch articles to update the list
+            }
         }
 
     }

@@ -6,11 +6,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -19,13 +22,13 @@ import com.example.mc_project.domain.model.Article
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
-// Updated HomeScreen.kt
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onArticleClick: (Article) -> Unit
+    onArticleClick: (Article) -> Unit,
+    onSettingsClick: () -> Unit,
+    onBookmarksClick: () -> Unit
 ) {
     val articles by viewModel.articles.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -44,6 +47,28 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
+                actions = {
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
+                    Button(
+                        onClick = onBookmarksClick,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite, // Change this to a different icon
+                            contentDescription = "Bookmarks",
+                            modifier = Modifier.padding(end = 8.dp) // Add space between icon and text
+                        )
+                        Text(
+                            text = "Bookmarks",
+                            color = Color.White
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -51,6 +76,7 @@ fun HomeScreen(
             )
         }
     ) { innerPadding ->
+        // Rest of the HomeScreen remains the same
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
@@ -73,6 +99,7 @@ fun HomeScreen(
                 keyboardActions = KeyboardActions(onSearch = { viewModel.searchArticles() })
             )
 
+            // The rest of your existing code...
             Box(modifier = Modifier.fillMaxSize()) {
                 if (isLoading && articles.isEmpty()) {
                     // Initial loading
@@ -114,7 +141,10 @@ fun HomeScreen(
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 items(articles) { article ->
-                                    PostCard(article = article, onClick = { onArticleClick(article) })
+                                    PostCard(
+                                        article = article,
+                                        onClick = { onArticleClick(article) }
+                                    )
                                 }
 
                                 if (isLoading) {

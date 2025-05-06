@@ -1,6 +1,5 @@
 package com.example.mc_project.data.di
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,10 +11,6 @@ import com.example.mc_project.data.remote.api.WikipediaApiService
 import com.example.mc_project.data.repository.ArticleRepositoryImpl
 import com.example.mc_project.domain.repository.ArticleRepository
 import com.example.mc_project.domain.usecase.GetRandomArticleUseCase
-import com.example.mc_project.preferences.LanguagePreferenceManager
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -23,15 +18,9 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideWikipediaApi(
-        @ApplicationContext context: Context,
-        languagePreferenceManager: LanguagePreferenceManager
-    ): WikipediaApiService {
-        val lang = runBlocking { languagePreferenceManager.languageFlow.first() }
-        val baseUrl = "https://${lang}.wikipedia.org/api/rest_v1/"
-
+    fun provideWikipediaApi(): WikipediaApiService {
         return Retrofit.Builder()
-            .baseUrl(baseUrl)
+            .baseUrl("https://en.wikipedia.org/api/rest_v1/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(WikipediaApiService::class.java)

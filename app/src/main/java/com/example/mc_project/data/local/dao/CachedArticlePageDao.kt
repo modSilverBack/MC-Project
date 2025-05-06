@@ -13,4 +13,7 @@ interface CachedArticlePageDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCachedPage(cache: CachedArticlePageEntity)
+
+    @Query("DELETE FROM cached_article_page")
+    suspend fun clearAllPages()
 }

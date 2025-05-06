@@ -1,5 +1,3 @@
-package com.example.mc_project.ui.home
-
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
@@ -9,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -19,19 +18,26 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.gestures.detectTransformGestures
 import com.example.mc_project.domain.model.Article
 import com.example.mc_project.ui.detail.DetailArticleViewModel
+import com.example.mc_project.ui.settings.ReadingPreferencesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailArticleScreen(
     article: Article,
     onBackClick: () -> Unit,
-    viewModel: DetailArticleViewModel = hiltViewModel()
+    viewModel: DetailArticleViewModel = hiltViewModel(),
+    preferencesViewModel: ReadingPreferencesViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val isPlaying = viewModel.isPlaying
     val speechRate = viewModel.speechRate
+    val readingPreferencesState = preferencesViewModel.readingPreferences.collectAsState()
+    val readingPreferences = readingPreferencesState.value
 
     Scaffold(
         topBar = {
@@ -87,6 +93,13 @@ fun DetailArticleScreen(
                 .fillMaxSize()
         ) {
             article.imageUrl?.let { url ->
+                val zoomModifier = Modifier.pointerInput(Unit) {
+                    detectTransformGestures { _, pan, zoom, _ ->
+                        // Adjust zoom scale on pinch-to-zoom
+                        viewModel.zoomScale = (viewModel.zoomScale * zoom).coerceIn(1f, 3f) // Min 1x, max 3x zoom
+                    }
+                }
+
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(url)
@@ -94,10 +107,14 @@ fun DetailArticleScreen(
                         .build(),
                     contentDescription = "Article Image",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
+                    modifier = zoomModifier
                         .fillMaxWidth()
                         .height(200.dp)
                         .padding(bottom = 16.dp)
+                        .graphicsLayer(
+                            scaleX = viewModel.zoomScale,
+                            scaleY = viewModel.zoomScale
+                        )
                 )
             }
 
@@ -108,10 +125,13 @@ fun DetailArticleScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            article.extract?.let {
+            article?.extract?.let { content ->
                 Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyLarge
+                    text = content,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = MaterialTheme.typography.bodyLarge.fontSize * readingPreferences.textSize.scaleFactor,
+                        fontFamily = readingPreferences.fontFamily
+                    )
                 )
             }
 
@@ -133,4 +153,3 @@ fun DetailArticleScreen(
         }
     }
 }
-

@@ -37,4 +37,7 @@ class CachedArticlePageRepositoryImpl @Inject constructor(
         val entity = CachedArticlePageEntity(pageNumber = pageNumber, articles = articles)
         dao.insertCachedPage(entity)
     }
+    override suspend fun clearCache(){
+        dao.clearAllPages()
+    }
 }
